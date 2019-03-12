@@ -182,14 +182,16 @@ int oddBits(void) {
    return result;
 }
 /*
- * isTmin - returns 1 if x is the minimum, two's complement number,
+ * isTmin - returns 1 if x is the minimum two's complement number,
  *     and 0 otherwise 
  *   Legal ops: ! ~ & ^ | +
  *   Max ops: 10
  *   Rating: 1
  */
 int isTmin(int x) {
-  return (x & 0xffffffff);
+  int comp2 = (!x) + 1;
+  return (comp2 == x);
+
 }
 /* 
  * bitXor - x^y using only ~ and & 
@@ -212,7 +214,9 @@ int bitXor(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+  int notA = !!x;
+  int twoComp = (~notA) + 1;
+  return (twoComp & y) | (~twoComp & z);
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -234,7 +238,7 @@ int greatestBitPos(int x) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+    return (x + ((x >> 31) & ((1 << n) + ~0))) >> n;
 }
 /* 
  * isNonNegative - return 1 if x >= 0, return 0 otherwise 
