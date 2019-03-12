@@ -174,7 +174,12 @@ NOTES:
  *   Rating: 2
  */
 int oddBits(void) {
-  return 2;
+   unsigned int x = 0xaa;
+   unsigned int y = x << 8;
+   unsigned int z = (y | x);
+   unsigned int z2 = z << 16;
+   unsigned int result = (z | z2);
+   return result;
 }
 /*
  * isTmin - returns 1 if x is the minimum, two's complement number,
@@ -184,7 +189,7 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
-  return 2;
+  return (x & 0xffffffff);
 }
 /* 
  * bitXor - x^y using only ~ and & 
@@ -194,7 +199,10 @@ int isTmin(int x) {
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-  return 2;
+  int var1 = x & (~y);
+  int var2 = (~x) & y;
+  int var3 = ~(~(var1) & ~(var2));
+  return var3;
 }
 /* 
  * conditional - same as x ? y : z 
