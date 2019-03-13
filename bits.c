@@ -174,11 +174,13 @@ NOTES:
  *   Rating: 2
  */
 int oddBits(void) {
-   unsigned int x = 0xaa;
-   unsigned int y = x << 8;
-   unsigned int z = (y | x);
-   unsigned int z2 = z << 16;
-   unsigned int result = (z | z2);
+   //start the pattern, then shift it over and or it with itself
+   //repeat a second time with the shifted pattern so the pattern repeats over all 32 bits
+   int x = 0xaa;
+   int y = x << 8;
+   int z = (y | x);
+   int z2 = z << 16;
+   int result = (z | z2);
    return result;
 }
 /*
@@ -189,6 +191,8 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
+	//Find the two's complement and xor it with the original
+	//then not the original, add them together, and not that
 	int comp2 = (~x) + 1;
 	int eq = (x ^ comp2);
 	int secondCase = !x;
@@ -204,6 +208,9 @@ int isTmin(int x) {
  *   Rating: 1
  */
 int bitXor(int x, int y) {
+  //not y, and it with x; not x, and it with y
+  //not both results
+  //Use Demorgan's law
   int var1 = x & (~y);
   int var2 = (~x) & y;
   int var3 = ~(~(var1) & ~(var2));
@@ -217,6 +224,10 @@ int bitXor(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
+  //return z if x is 0, y if x is anything else
+  //double not x in order to make it 0 if 0 or 1 if anyone else
+  //Take the two's complement
+  //And it with y, and the inverse with z, or them together
   int notA = !!x;
   int twoComp = (~notA) + 1;
   return (twoComp & y) | (~twoComp & z);
@@ -241,7 +252,17 @@ int greatestBitPos(int x) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return (x + ((x >> 31) & ((1 << n) + ~0))) >> n;
+	//ultra right shift to get leftmost bit
+	//determine bias in order to round toward zero
+	//And together, add to x
+	//right shift by n in order to perform the actual divison
+	//roughly follows technique described in chapter 2 of textbook
+	int rightShift = x >> 31;
+	int leftShift = 1 << n;
+	int handleRound = leftShift + ~0;
+	int together = rightShift & handleRound;
+	int addX = x + together;
+	return addX >> n;
 }
 /* 
  * isNonNegative - return 1 if x >= 0, return 0 otherwise 
@@ -251,13 +272,8 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  int twoComp = (~x) + 1;
-  int compShift = twoComp << 31;
-  return !(compShift);
-  //take two's complement
-  //find last bit
-  //not it
-  //return that value
+	//DO THE ZERO CASE
+  return !((x >> 31) | (!x));
 }
 /*
  * satMul2 - multiplies by 2, saturating to Tmin or Tmax if overflow
@@ -269,7 +285,8 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-  return 2;
+  //return ((x << 2) ^ (with tmin)) & (!(x << 2) ^ (with tmax)) & (with number to handle 0 case) ;
+	return 1;
 }
 /* 
  * isLess - if x < y  then return 1, else return 0 
