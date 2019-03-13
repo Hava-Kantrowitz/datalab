@@ -189,8 +189,11 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
-  int comp2 = (!x) + 1;
-  return (comp2 == x);
+	int comp2 = (~x) + 1;
+	int eq = (x ^ comp2);
+	int secondCase = !x;
+	int combine = !(eq + secondCase);
+    return combine;
 
 }
 /* 
@@ -248,7 +251,13 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  return 2;
+  int twoComp = (~x) + 1;
+  int compShift = twoComp << 31;
+  return !(compShift);
+  //take two's complement
+  //find last bit
+  //not it
+  //return that value
 }
 /*
  * satMul2 - multiplies by 2, saturating to Tmin or Tmax if overflow
