@@ -241,7 +241,43 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-  return 2;
+	x = (x >> 1) | x;
+    x = (x >> 1) | x;
+    x = (x >> 1) | x;
+    x = (x >> 1) | x;
+    x = (x >> 1) | x;
+    x = (x >> 1) | x;
+    x = (x >> 1) | x;
+    x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+
+    x = (x >> 1) + 1;
+    //how to handle the negative case
+    //because it will always return 0s
+    //mask idea but that didn't work
+    return x;
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -272,8 +308,8 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-	//DO THE ZERO CASE
-  return !((x >> 31) | (!x));
+  //ultra right shift to get last bit, not the value
+  return !(x >> 31);
 }
 /*
  * satMul2 - multiplies by 2, saturating to Tmin or Tmax if overflow
@@ -285,7 +321,6 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-  //return ((x << 2) ^ (with tmin)) & (!(x << 2) ^ (with tmax)) & (with number to handle 0 case) ;
 	return 1;
 }
 /* 
