@@ -195,8 +195,8 @@ int isTmin(int x) {
 	//then not the original, add them together, and not that
 	int comp2 = (~x) + 1;
 	int eq = (x ^ comp2);
-	int secondCase = !x;
-	int combine = !(eq + secondCase);
+	int zeroCheck = !x;
+	int combine = !(eq + zeroCheck);
     return combine;
 
 }
@@ -228,8 +228,8 @@ int conditional(int x, int y, int z) {
   //double not x in order to make it 0 if 0 or 1 if anyone else
   //Take the two's complement
   //And it with y, and the inverse with z, or them together
-  int notA = !!x;
-  int twoComp = (~notA) + 1;
+  int notX = !!x;
+  int twoComp = (~notX) + 1;
   return (twoComp & y) | (~twoComp & z);
 }
 /* 
@@ -241,6 +241,8 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
+
+	int original = x;
 	x = (x >> 1) | x;
     x = (x >> 1) | x;
     x = (x >> 1) | x;
@@ -248,13 +250,13 @@ int greatestBitPos(int x) {
     x = (x >> 1) | x;
     x = (x >> 1) | x;
     x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
+	x = (x >> 1) | x;
     x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
+    x = (x >> 1) | x;
 	x = (x >> 1) | x;
 	x = (x >> 1) | x;
 	x = (x >> 1) | x;
@@ -273,11 +275,12 @@ int greatestBitPos(int x) {
 	x = (x >> 1) | x;
 	x = (x >> 1) | x;
 
-    x = (x >> 1) + 1;
-    //how to handle the negative case
-    //because it will always return 0s
-    //mask idea but that didn't work
-    return x;
+    int specialMask = 0x80 << 24;
+    //x = (specialMask ^ x) & original;
+    //doesn't work for negative case --> result is all 0s
+    return (specialMask ^ x) & original;
+
+    //return x;
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -321,6 +324,7 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
+  //return ((x << 2) ^ (with tmin)) & (!(x << 2) ^ (with tmax)) & (with number to handle 0 case) ;
 	return 1;
 }
 /* 
@@ -331,7 +335,16 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-  return 2;
+	//COMMENT HOW THIS WORKS
+	int sameSign = (x >> 31) ^ (y >> 31);
+	int yShift = !(y >> 31);
+	int handleSame = sameSign & yShift;
+	int twoComp = (~y) + 1;
+	int addX = x + twoComp;
+	int xShift = addX >> 31;
+	int handleDiff = !sameSign & !!xShift;
+	return handleSame | handleDiff;
+
 }
 /* 
  * isAsciiDigit - return 1 if 0x30 <= x <= 0x39 (ASCII codes for characters '0' to '9')
@@ -343,6 +356,7 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
+	//look at the binary representations
   return 2;
 }
 /*
