@@ -174,8 +174,11 @@ NOTES:
  *   Rating: 2
  */
 int oddBits(void) {
-   //start the pattern, then shift it over and or it with itself
-   //repeat a second time with the shifted pattern so the pattern repeats over all 32 bits
+    /*
+    * start the pattern, then shift it over and or it with itself
+    * repeat a second time with the shifted pattern so the pattern repeats over all 32 bits
+    */
+
    int x = 0xaa;
    int y = x << 8;
    int z = (y | x);
@@ -191,8 +194,11 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
-	//Find the two's complement and xor it with the original
-	//then not the original, add them together, and not that
+	/*
+	 * Find the two's complement and xor it with the original
+	 * then not the original, add them together, and not that
+	 */
+
 	int comp2 = (~x) + 1;
 	int eq = (x ^ comp2);
 	int zeroCheck = !x;
@@ -208,9 +214,10 @@ int isTmin(int x) {
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-  //not y, and it with x; not x, and it with y
-  //not both results
-  //Use Demorgan's law
+  /*
+   * not y, and it with x; not x, and it with y
+  not both results
+  Use Demorgan's law*/
   int var1 = x & (~y);
   int var2 = (~x) & y;
   int var3 = ~(~(var1) & ~(var2));
@@ -242,45 +249,29 @@ int conditional(int x, int y, int z) {
  */
 int greatestBitPos(int x) {
 
-	int original = x;
-	x = (x >> 1) | x;
-    x = (x >> 1) | x;
-    x = (x >> 1) | x;
-    x = (x >> 1) | x;
-    x = (x >> 1) | x;
-    x = (x >> 1) | x;
-    x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-    x = (x >> 1) | x;
-    x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
-	x = (x >> 1) | x;
+	/*
+	 * Right shift the integer over, oring it with itself before each shift in order to get all 1's in
+	 * the bits at the MSB and to the right. Create the mask. Check for negative and tMax,
+	 * returning their specific masks if found. If not found, return created mask
+	 */
 
-    int specialMask = 0x80 << 24;
-    //x = (specialMask ^ x) & original;
-    //doesn't work for negative case --> result is all 0s
-    return (specialMask ^ x) & original;
+	int rs1 = x >> 1;
+	int rs1or = x | rs1;
+	int rs2 = rs1or >> 2;
+	int rs2or = rs1or | rs2;
+	int rs4 = rs2or >> 4;
+	int rs4or = rs2or | rs4;
+	int rs8 = rs4or >> 8;
+	int rs8or = rs4or | rs8;
+	int rs16 = rs8or >> 16;
+	int rs16or = rs8or | rs16;
 
-    //return x;
+	int add1 = rs16or + 1;
+	int specialMask = add1 >> 1;
+	int tMin = 1 << 31;
+	int negCheck = ((x >> 31) & (tMin)) | ((~(x >> 31)) & (specialMask >> 31) & (1 << 30));
+	int oneCheck = negCheck | ((~specialMask >> 31) & specialMask);
+	return oneCheck;
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -324,8 +315,15 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-  //return ((x << 2) ^ (with tmin)) & (!(x << 2) ^ (with tmax)) & (with number to handle 0 case) ;
-	return 1;
+	int mult = x << 1;
+	int xSign = x >> 31;
+	int multSign = mult >> 31;
+	int checkSame = (((!!(multSign ^ xSign)) << 31) >> 31);
+	int tMin = 1 << 31;
+	int tMax = ~tMin;
+	int maxOrMin = (xSign & tMin) | ((~xSign) & tMax);
+	int answer = (checkSame & maxOrMin) | ((~checkSame) & mult);
+	return answer;
 }
 /* 
  * isLess - if x < y  then return 1, else return 0 
@@ -335,7 +333,9 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-	//COMMENT HOW THIS WORKS
+	//or the last bits together to determine if sign is the same
+	//Use two's complement for case when signs are different
+	//Use DeMorgan's law to perform comparison
 	int sameSign = (x >> 31) ^ (y >> 31);
 	int yShift = !(y >> 31);
 	int handleSame = sameSign & yShift;
@@ -381,6 +381,11 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
+	//gbp code
+	//divide in half
+	//is one in first half or second half?
+	//if one is in second half, add 16
+	//if one is in first half, return that value
   return 2;
 }
 /* 
