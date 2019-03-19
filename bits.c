@@ -174,17 +174,13 @@ NOTES:
  *   Rating: 2
  */
 int oddBits(void) {
-    /*
-    * start the pattern, then shift it over and or it with itself
-    * repeat a second time with the shifted pattern so the pattern repeats over all 32 bits
-    */
 
-   int x = 0xaa;
-   int y = x << 8;
-   int z = (y | x);
-   int z2 = z << 16;
+   int x = 0xaa;//Start the pattern
+   int y = x << 8;//Shift by 8
+   int z = (y | x);//or it with itself
+   int z2 = z << 16;//repeat with a 16 shift in order to repeat the pattern over all 32 bits
    int result = (z | z2);
-   return result;
+   return result;//return the pattern
 }
 /*
  * isTmin - returns 1 if x is the minimum two's complement number,
@@ -194,15 +190,16 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
+
 	/*
 	 * Find the two's complement and xor it with the original
 	 * then not the original, add them together, and not that
 	 */
 
-	int comp2 = (~x) + 1;
-	int eq = (x ^ comp2);
-	int zeroCheck = !x;
-	int combine = !(eq + zeroCheck);
+	int comp2 = (~x) + 1;//Find two's complement
+	int eq = (x ^ comp2);//xor it with original
+	int check = !x;//Not the original
+	int combine = !(eq + check);//And them together, then not the value to obtain 1 if tMin and 0 otherwise
     return combine;
 
 }
@@ -214,15 +211,13 @@ int isTmin(int x) {
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-  /*
-   * not y, and it with x; not x, and it with y
-  not both results
-  Use Demorgan's law*/
-  int var1 = x & (~y);
-  int var2 = (~x) & y;
-  int var3 = ~(~(var1) & ~(var2));
-  return var3;
+
+  int var1 = x & (~y);//not y and x
+  int var2 = (~x) & y;//not x and y
+  int var3 = ~(~(var1) & ~(var2));//Demorgan's Law to compare
+  return var3;//return result of comparison
 }
+
 /* 
  * conditional - same as x ? y : z 
  *   Example: conditional(2,4,5) = 4
@@ -231,10 +226,13 @@ int bitXor(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  //return z if x is 0, y if x is anything else
-  //double not x in order to make it 0 if 0 or 1 if anyone else
-  //Take the two's complement
-  //And it with y, and the inverse with z, or them together
+  /*
+  * return z if x is 0, y if x is anything else
+  * double not x in order to make it 0 if 0 or 1 if anyone else
+  * Take the two's complement
+  * And it with y, and the inverse with z, or them together
+  */
+
   int notX = !!x;
   int twoComp = (~notX) + 1;
   return (twoComp & y) | (~twoComp & z);
@@ -282,11 +280,13 @@ int greatestBitPos(int x) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-	//ultra right shift to get leftmost bit
-	//determine bias in order to round toward zero
-	//And together, add to x
-	//right shift by n in order to perform the actual divison
-	//roughly follows technique described in chapter 2 of textbook
+
+	/*ultra right shift to get leftmost bit
+	determine bias in order to round toward zero
+	And together, add to x
+	right shift by n in order to perform the actual divison
+	roughly follows technique described in chapter 2 of textbook*/
+
 	int rightShift = x >> 31;
 	int leftShift = 1 << n;
 	int handleRound = leftShift + ~0;
@@ -302,7 +302,7 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  //ultra right shift to get last bit, not the value
+  /*ultra right shift to get last bit, not the value*/
   return !(x >> 31);
 }
 /*
@@ -315,7 +315,7 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-	/**
+	/*
 	 * Multiply, then isolate the sign of the original and multiplied. Compare them, ultra-shifting
 	 * both left and right in order to populate an entire integer with the sign bit. Use the sign of
 	 * the original to determine whether it is negative, and therefore might saturate to tMin, or positive,
@@ -341,9 +341,11 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-	//or the last bits together to determine if sign is the same
-	//Use two's complement for case when signs are different
-	//Use DeMorgan's law to perform comparison
+
+	/*or the last bits together to determine if sign is the same
+	Use two's complement for case when signs are different
+	Use DeMorgan's law to perform comparison*/
+
 	int sameSign = (x >> 31) ^ (y >> 31);
 	int yShift = !(y >> 31);
 	int handleSame = sameSign & yShift;
@@ -364,9 +366,16 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-	/**
-	 * COMMENT
+
+	/*
+	 * Shift the given value by 4 in order to isolate the 5th and 6th bits
+	 * Check that they are both ones by checking that they are 3 (xor with 3)
+	 * Add 6 (max value that can be added to an ascii digit and still remain in range)
+	 * Shift added value and check that 5th and 6th digits are still 1
+	 * Not the compared values in order to receive a 1 if it is within range, a 0 if not in range
+	 * If both are in range, return 1, if one or both are out of range, return 0
 	 */
+
 	int shiftFirst = x >> 4;
 	int compareFirst = !(shiftFirst ^ 3);
 	int add = x + 6;
@@ -386,7 +395,16 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-  return 2;
+
+  int xVal = ((~(x >> 31)) & x) | ((x >> 31) & (x+1));//if x is positive, keep x as x, if it's negative x is x + 1
+  int endBits = xVal & 3;//save the last 2 bits of x
+  int div4full = xVal >> 2;//divide x value by 4 to avoid overflow
+  int mult3full = div4full + (div4full << 1);//multiply it by 3 to get actual number
+  int mult3end = endBits + (endBits << 1);//do the same with the last two bits, starting with multiplication
+  int div4end = mult3end >> 2;
+  int together = div4end + mult3full; //add both computations together for final adjusted result
+
+  return together;
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -396,6 +414,7 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
+
 	//gbp code
 	//divide in half
 	//is one in first half or second half?
@@ -416,7 +435,7 @@ int ilog2(int x) {
 	int specialMask = add1 >> 1;
 
 
-  return oneCheck;
+  return specialMask;
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
@@ -430,7 +449,20 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+
+ unsigned exp = uf >> 23;//grab the exponent by right shifting it over 23
+ unsigned expNAN = exp & 0xff;//And with 11111111 to check if all one's
+ unsigned fraction = uf << 9; //grab fraction by left shifting it over 9
+ unsigned tMin = 1 << 31;//create tMin
+ unsigned fracNotZero = !fraction;//yields 0 if there are any ones in the fraction, 1 otherwise
+
+ if ((expNAN == 0xff) && !fracNotZero){//If the exponent is all 1's and the fraction isn't 0, it's NAN
+	 return uf;//so just return the argument
+ }
+ else{//otherwise return the argument xored with tMin in order to flip just the sign bit
+	 return (uf ^ tMin);
+ }
+
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -442,6 +474,7 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
+
   return 2;
 }
 /* 
@@ -456,5 +489,6 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
+
   return 2;
 }
