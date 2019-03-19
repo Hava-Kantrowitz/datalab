@@ -191,11 +191,6 @@ int oddBits(void) {
  */
 int isTmin(int x) {
 
-	/*
-	 * Find the two's complement and xor it with the original
-	 * then not the original, add them together, and not that
-	 */
-
 	int comp2 = (~x) + 1;//Find two's complement
 	int eq = (x ^ comp2);//xor it with original
 	int check = !x;//Not the original
@@ -228,14 +223,11 @@ int bitXor(int x, int y) {
 int conditional(int x, int y, int z) {
   /*
   * return z if x is 0, y if x is anything else
-  * double not x in order to make it 0 if 0 or 1 if anyone else
-  * Take the two's complement
-  * And it with y, and the inverse with z, or them together
   */
 
-  int notX = !!x;
-  int twoComp = (~notX) + 1;
-  return (twoComp & y) | (~twoComp & z);
+  int notX = !!x;//double not x in order to make it 0 if 0 or 1 if anything else
+  int twoComp = (~notX) + 1;//take two's complement
+  return (twoComp & y) | (~twoComp & z);//And it with y, and the inverse with z, or them together
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -247,14 +239,8 @@ int conditional(int x, int y, int z) {
  */
 int greatestBitPos(int x) {
 
-	/*
-	 * Right shift the integer over, oring it with itself before each shift in order to get all 1's in
-	 * the bits at the MSB and to the right. Create the mask. Check for negative and tMax,
-	 * returning their specific masks if found. If not found, return created mask
-	 */
-
-	int rs1 = x >> 1;
-	int rs1or = x | rs1;
+	int rs1 = x >> 1;//Right shift the integer over, oring it with itself before each shift
+	int rs1or = x | rs1;//in order to get all 1's in the bits at the MSB and to the right
 	int rs2 = rs1or >> 2;
 	int rs2or = rs1or | rs2;
 	int rs4 = rs2or >> 4;
@@ -264,12 +250,12 @@ int greatestBitPos(int x) {
 	int rs16 = rs8or >> 16;
 	int rs16or = rs8or | rs16;
 
-	int add1 = rs16or + 1;
-	int specialMask = add1 >> 1;
-	int tMin = 1 << 31;
-	int negCheck = ((x >> 31) & (tMin)) | ((~(x >> 31)) & (specialMask >> 31) & (1 << 30));
-	int oneCheck = negCheck | ((~specialMask >> 31) & specialMask);
-	return oneCheck;
+	int add1 = rs16or + 1;//add 1 in order to get 0's in all bits MSB and right, and a 1 to the left of the MSB
+	int specialMask = add1 >> 1;//create the mask
+	int tMin = 1 << 31;//create tMin
+	int negCheck = ((x >> 31) & (tMin)) | ((~(x >> 31)) & (specialMask >> 31) & (1 << 30));//check for negative
+	int oneCheck = negCheck | ((~specialMask >> 31) & specialMask);//check for tMax
+	return oneCheck;//return the specific masks for special cases checked for, return the original mask otherwise
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -281,18 +267,16 @@ int greatestBitPos(int x) {
  */
 int divpwr2(int x, int n) {
 
-	/*ultra right shift to get leftmost bit
-	determine bias in order to round toward zero
-	And together, add to x
-	right shift by n in order to perform the actual divison
-	roughly follows technique described in chapter 2 of textbook*/
+	/*
+	 * roughly follows technique described in chapter 2 of textbook
+	 */
 
-	int rightShift = x >> 31;
-	int leftShift = 1 << n;
+	int rightShift = x >> 31;//ultra right shift to get leftmost bit
+	int leftShift = 1 << n;//determine bias in order to round toward zero
 	int handleRound = leftShift + ~0;
-	int together = rightShift & handleRound;
-	int addX = x + together;
-	return addX >> n;
+	int together = rightShift & handleRound;//add together
+	int addX = x + together;//add to x
+	return addX >> n;//right shift by n in order to perform the actual division
 }
 /* 
  * isNonNegative - return 1 if x >= 0, return 0 otherwise 
@@ -302,8 +286,7 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  /*ultra right shift to get last bit, not the value*/
-  return !(x >> 31);
+  return !(x >> 31);//ultra right shift to get last bit, not the value
 }
 /*
  * satMul2 - multiplies by 2, saturating to Tmin or Tmax if overflow
@@ -316,22 +299,18 @@ int isNonNegative(int x) {
  */
 int satMul2(int x) {
 	/*
-	 * Multiply, then isolate the sign of the original and multiplied. Compare them, ultra-shifting
-	 * both left and right in order to populate an entire integer with the sign bit. Use the sign of
-	 * the original to determine whether it is negative, and therefore might saturate to tMin, or positive,
-	 * and therefore might saturate to tMax. If the first check shows the signs are different, perform
-	 * the min or max check. Else, just return the multiplied value
+	 * Negative overflow saturates to tMin, positive overflow saturates to tMax
 	 */
 
-	int mult = x << 1;
-	int xSign = x >> 31;
-	int multSign = mult >> 31;
-	int checkSame = (((!!(multSign ^ xSign)) << 31) >> 31);
-	int tMin = 1 << 31;
-	int tMax = ~tMin;
-	int maxOrMin = (xSign & tMin) | ((~xSign) & tMax);
-	int answer = (checkSame & maxOrMin) | ((~checkSame) & mult);
-	return answer;
+	int mult = x << 1;//Multiply by 2
+	int xSign = x >> 31;//Isolate the sign of the original
+	int multSign = mult >> 31;//Isolate the sign of the multiplied
+	int checkSame = (((!!(multSign ^ xSign)) << 31) >> 31);//compare them, ultra-shifting both left and right in order to populate all 32 bits with sign bit
+	int tMin = 1 << 31;//get tMin
+	int tMax = ~tMin;//get tMax
+	int maxOrMin = (xSign & tMin) | ((~xSign) & tMax);//Use the sign to determine whether it's negative or positive
+	int answer = (checkSame & maxOrMin) | ((~checkSame) & mult);//if the first check shows the signs are different, perform the min or max check
+	return answer;//return the value saturated to, or if neither of the checks are hit, return the multiplied value
 }
 /* 
  * isLess - if x < y  then return 1, else return 0 
@@ -342,18 +321,14 @@ int satMul2(int x) {
  */
 int isLess(int x, int y) {
 
-	/*or the last bits together to determine if sign is the same
-	Use two's complement for case when signs are different
-	Use DeMorgan's law to perform comparison*/
-
-	int sameSign = (x >> 31) ^ (y >> 31);
-	int yShift = !(y >> 31);
-	int handleSame = sameSign & yShift;
-	int twoComp = (~y) + 1;
-	int addX = x + twoComp;
-	int xShift = addX >> 31;
-	int handleDiff = !sameSign & !!xShift;
-	return handleSame | handleDiff;
+	int sameSign = (x >> 31) ^ (y >> 31);//or the last bits together to determine if sign is the same
+	int yShift = !(y >> 31);//get the leftmost bit and not it
+	int handleSame = sameSign & yShift;//handle the same case
+	int twoComp = (~y) + 1;//find two's complement of y
+	int addX = x + twoComp;//add x to the two's complement
+	int xShift = addX >> 31;//ultra right shift the value in order to get the last digit
+	int handleDiff = !sameSign & !!xShift;//compare and return lesser value
+	return handleSame | handleDiff;//two's complement handles when the sign is different
 
 }
 /* 
@@ -376,12 +351,12 @@ int isAsciiDigit(int x) {
 	 * If both are in range, return 1, if one or both are out of range, return 0
 	 */
 
-	int shiftFirst = x >> 4;
-	int compareFirst = !(shiftFirst ^ 3);
-	int add = x + 6;
-	int shiftSecond = add >> 4;
-	int compareSecond = !(shiftSecond ^ 3);
-	return (compareFirst & compareSecond);
+	int shiftFirst = x >> 4;//Shift the given value by 4 in order to isolate the 5th and 6th bits
+	int compareFirst = !(shiftFirst ^ 3);//Check that they are both ones by checking that they are 3 (xor with 3)
+	int add = x + 6;//Add 6 (max value that can be added to an ascii digit and still remain in range)
+	int shiftSecond = add >> 4;//Shift added value
+	int compareSecond = !(shiftSecond ^ 3);//Check that 5th and 6th digits are still 1, not the compared values in order to receive a 1 if it is within range, a 0 if not in range
+	return (compareFirst & compareSecond);//If both are in range, return 1, if one or both are out of range, return 0
 }
 /*
  * trueThreeFourths - multiplies by 3/4 rounding toward 0,
