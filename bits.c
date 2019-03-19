@@ -315,6 +315,14 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
+	/**
+	 * Multiply, then isolate the sign of the original and multiplied. Compare them, ultra-shifting
+	 * both left and right in order to populate an entire integer with the sign bit. Use the sign of
+	 * the original to determine whether it is negative, and therefore might saturate to tMin, or positive,
+	 * and therefore might saturate to tMax. If the first check shows the signs are different, perform
+	 * the min or max check. Else, just return the multiplied value
+	 */
+
 	int mult = x << 1;
 	int xSign = x >> 31;
 	int multSign = mult >> 31;
@@ -356,8 +364,15 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-	//look at the binary representations
-  return 2;
+	/**
+	 * COMMENT
+	 */
+	int shiftFirst = x >> 4;
+	int compareFirst = !(shiftFirst ^ 3);
+	int add = x + 6;
+	int shiftSecond = add >> 4;
+	int compareSecond = !(shiftSecond ^ 3);
+	return (compareFirst & compareSecond);
 }
 /*
  * trueThreeFourths - multiplies by 3/4 rounding toward 0,
@@ -386,7 +401,22 @@ int ilog2(int x) {
 	//is one in first half or second half?
 	//if one is in second half, add 16
 	//if one is in first half, return that value
-  return 2;
+	int rs1 = x >> 1;
+	int rs1or = x | rs1;
+	int rs2 = rs1or >> 2;
+	int rs2or = rs1or | rs2;
+	int rs4 = rs2or >> 4;
+	int rs4or = rs2or | rs4;
+	int rs8 = rs4or >> 8;
+	int rs8or = rs4or | rs8;
+	int rs16 = rs8or >> 16;
+	int rs16or = rs8or | rs16;
+
+	int add1 = rs16or + 1;
+	int specialMask = add1 >> 1;
+
+
+  return oneCheck;
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
