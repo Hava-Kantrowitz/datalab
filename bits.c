@@ -390,12 +390,7 @@ int trueThreeFourths(int x)
  */
 int ilog2(int x) {
 
-	//gbp code
-	//divide in half
-	//is one in first half or second half?
-	//if one is in second half, add 16
-	//if one is in first half, return that value
-	int rs1 = x >> 1;
+	int rs1 = x >> 1;//greatest bit positive code in order to get mask with one in gbp location
 	int rs1or = x | rs1;
 	int rs2 = rs1or >> 2;
 	int rs2or = rs1or | rs2;
@@ -408,9 +403,57 @@ int ilog2(int x) {
 
 	int add1 = rs16or + 1;
 	int specialMask = add1 >> 1;
+	int counter = 0;//counter to keep track of location of gbp
 
+	//return counter;
 
-  return specialMask;
+	int firstHalf = specialMask >> 16;//shift by 16 to grab first half of bit patterm
+	int secondHalf = specialMask;//second half is just the bit pattern
+
+	int firstHalfZero = !!firstHalf;//0 if first half is all 0's, one otherwise
+	int ultraShift = (firstHalfZero << 31) >> 31;//populate the bit with all 0's if first half is all 0's, all 1's otherwise
+	int whatToKeep = (ultraShift & firstHalf) | (~ultraShift & secondHalf);//return the half with the one in it
+	counter = (ultraShift & (counter + 16)) | (~ultraShift & counter);//update the counter to reflect bit location
+
+	//return counter;
+
+	firstHalf = whatToKeep >> 8;//the above steps are repeated for shift of 8, shifting the bits in half again
+	secondHalf = whatToKeep;
+
+	firstHalfZero = !!firstHalf;
+	ultraShift = (firstHalfZero << 31) >> 31;
+	counter = (ultraShift & (counter + 8)) | (~ultraShift & counter);
+	whatToKeep = (ultraShift & firstHalf) | (~ultraShift & secondHalf);
+
+	//return counter;
+
+	firstHalf = whatToKeep >> 4;//the above steps are repeated for shift of 4, shifting the bits in half again
+	secondHalf = whatToKeep;
+
+	firstHalfZero = !!firstHalf;
+	ultraShift = (firstHalfZero << 31) >> 31;
+	counter = (ultraShift & (counter + 4)) | (~ultraShift & counter);
+	whatToKeep = (ultraShift & firstHalf) | (~ultraShift & secondHalf);
+
+	//return counter;
+
+	firstHalf = whatToKeep >> 2;//the above steps are repeated for shift of 2, shifting the bits in half again
+	secondHalf = whatToKeep;
+
+	firstHalfZero = !!firstHalf;
+	ultraShift = (firstHalfZero << 31) >> 31;
+	counter = (ultraShift & (counter + 2)) | (~ultraShift & counter);
+	whatToKeep = (ultraShift & firstHalf) | (~ultraShift & secondHalf);
+
+	//return counter;
+
+	firstHalf = whatToKeep >> 1;//the above steps are repeated for shift of 1, shifting the bits in half again
+
+	firstHalfZero = !!firstHalf;
+	ultraShift = (firstHalfZero << 31) >> 31;
+	counter = (ultraShift & (counter + 1)) | (~ultraShift & counter);
+
+    return counter;//return the counter of where the bit position is kept
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
@@ -465,5 +508,27 @@ unsigned float_i2f(int x) {
  */
 unsigned float_twice(unsigned uf) {
 
-  return 2;
+	unsigned signPrep = uf >> 31;//grab the sign by grabbing the leftmost bit
+	unsigned sign = signPrep << 31;//fill the rest of the float with 0's so the sign can be or-ed back in later - THIS IS THE SIGN
+	unsigned noSign = uf << 1;//right shift to chop off sign bit
+	unsigned expPrep = noSign >> 24;//grab the exponent
+	unsigned exp = expPrep << 23;//fill the rest of the float with 0's so the exponent can be or-ed back in later - THIS IS THE EXPONENT
+	unsigned mantPrep = uf << 9;//grab the mantissa
+	unsigned mant = mantPrep >> 9;//fill the rest of the float with 0's so the mantissa can be or-ed back in later - THIS IS THE MANTISSA
+    unsigned nan = 0x7f800000;//not a number
+
+	if (exp == 0){//if the exponent is 0, just multiply normally
+		unsigned times2 = uf << 1;//to multiply, left shift by 1
+		return (times2 | sign);//or sign bit back in before returning
+	}
+	else if (exp == nan){//If the exponent is NAN, just return argument
+		return uf;
+	}
+	else{//otherwise return the argument multiplied by 2
+	 unsigned one = 1 << 23; //fill the entire float with 1's to have a thing of 1 to add
+	 unsigned multExp = exp + one;//to multiply, add 1 to the exponent
+	 return (sign | multExp | mant);//or the sign and mantissa bits back in before returning
+	}
+
+
 }
