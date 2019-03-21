@@ -511,45 +511,45 @@ unsigned float_i2f(int x) {
 			if (x < 0){//If x is negative, reverse the sign
 				x = -x;
 			}
-			  // Get highest bit of one
-		   	while((x >> exp) != 1){
-				  exp++;
+
+		   	while((x >> exp) != 1){//keep shifting right until just a 1 remains
+				  exp++;//increment the exponent each time
 		  	}
 
-		    // Whether all the bits can be stored
-		  	if (exp > 23){
-				  numDroppedBits = exp - 23;
-				  midShift = 1 << numDroppedBits;
-				  droppedBits = (midShift - 1) & x;
+		  	if (exp > 23){//If exponent is > 23 it overflows and must be rounded
+				  numDroppedBits = exp - 23;//count number of bits that overflowed and need to be dropped
+				  midShift = 1 << numDroppedBits;//create shifted mask for the number of bits
+				  droppedBits = (midShift - 1) & x;//mask with x, resulting in dropped bits
 
-				  mant = (x >> numDroppedBits) & mantMask;
+				  mant = (x >> numDroppedBits) & mantMask;//apply mantissa mask to adjust the mantissa
 
-				  roundHold = midShift>>1;
+				  roundHold = midShift>>1;//right shift the mask by 1 to adjust it
 
-				  if(droppedBits > roundHold ) {
-					  roundShiftHold = 1;
+				  if(droppedBits > roundHold ) {//if the bit pattern for bits dropped is greater than the bit pattern of the mask
+					  roundShiftHold = 1;//set mantissa adjustment to 1
 				  }
 
-				  else if (droppedBits == roundHold) {
-					   roundShiftHold = mant & 1;
+				  else if (droppedBits == roundHold) {//if the bit pattern for bits dropped is equal to the bit pattern of the mask
+					   roundShiftHold = mant & 1;//set mantissa adjustment
 				  }
 
-				  mant = mant + roundShiftHold;
+				  mant = mant + roundShiftHold;//adjust mantissa according to rounding rules above
 			  }
 
-		  	else{
-				  mant = ((1 << exp) ^ x) << (23 - exp);
+		  	else{//otherwise rounding isn't necessary
+				  mant = (1 << exp) ^ x;//adjust mantissa
+				  mant = (mant << (23 - exp));
 			  }
 
-			  if(mant == 0x800000) {
-				  exp = exp + 1;
-				  mant = 0;
+			  if(mant == 0x800000) {//if mantissa will overflow
+				  exp = exp + 1;//increment exponent by 1
+				  mant = 0;//resent mantissa to 0
 			  }
 
-			exp = exp + bias;
-			exp = exp << 23;
+			exp = exp + bias;//adjust the exponent to account for the bias
+			exp = exp << 23;//shift the exponent to its proper spot
 
-			finalFloat = sign + exp + mant;
+			finalFloat = sign | exp | mant;//or the three components of float together
 			return finalFloat;
 
 }
