@@ -477,6 +477,7 @@ unsigned float_neg(unsigned uf) {
  }
 
 }
+
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
  *   Result is returned as unsigned int, but
@@ -487,36 +488,72 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-	unsigned sign = (x >> 31) << 31;//grab the sign
-	unsigned mant = x;//set the entire input as the mantissa
-	unsigned mantCheck = mant;//save the original mantissa so this one can be manipulated
-	unsigned e = 0;//the mathematical representation in scientific notation of the exp, initialized to 0
-	unsigned frac = 0;//the fractional part of casted float, initialized to 0
-	unsigned exp = 0;//the exponent of casted float, initialized to 0
-	unsigned bias = 127;//bias for single precision in IEEE standard
-	unsigned fracMask = 0x7fffff;
 
-	if (x == 0){
-		return x;
-	}
-	else {
+	int sign = x & 0x80000000;//grab the sign
+	int exp = 0; //to store fraction, initialized to 0
+	int mant = 0;//to store mantissa, initialized to 0
+	int numDroppedBits = 0;//to store number of bits that are dropped, initialized to 0
+	int droppedBits = 0;//to store dropped bits, initialized to 0
+	int mantMask = 0x7fffff;//mask for adjusting mantissa
+	int midShift = 0;//to hold interim values during middle shift, initialized to 0
+	int roundHold = 0;//to hold interim values during rounding, initialized to 0
+	int roundShiftHold = 0;//to hold interim values during rounding and shifting, initialized to 0
+	int bias = 127;//the bias, with value of 127
+	unsigned finalFloat = 0;//final answer as an unsigned int, initialized to 0
 
-		if (x < 0){
-			mant = 0 - x;
+		if (x == 0){//If it's 0, just return 0 (so itself)
+			return x;
 		}
-		while (mantCheck != 1){
-			e++;
-			mantCheck = mantCheck >> 1;
+		else if (x == 0x80000000){//Tmin special case
+			return 0xcf000000;
 		}
 
-		frac = mant << (23-e);
-		frac = frac & fracMask;
-		exp = (e + bias) << 23;
+			if (x < 0){//If x is negative, reverse the sign
+				x = -x;
+			}
+			  // Get highest bit of one
+		   	while((x >> exp) != 1){
+				  exp++;
+		  	}
 
-		return (sign | exp | frac);
+		    // Whether all the bits can be stored
+		  	if (exp > 23){
+				  numDroppedBits = exp - 23;
+				  midShift = 1 << numDroppedBits;
+				  droppedBits = (midShift - 1) & x;
 
-	}
+				  mant = (x >> numDroppedBits) & mantMask;
+
+				  roundHold = midShift>>1;
+
+				  if(droppedBits > roundHold ) {
+					  roundShiftHold = 1;
+				  }
+
+				  else if (droppedBits == roundHold) {
+					   roundShiftHold = mant & 1;
+				  }
+
+				  mant = mant + roundShiftHold;
+			  }
+
+		  	else{
+				  mant = ((1 << exp) ^ x) << (23 - exp);
+			  }
+
+			  if(mant == 0x800000) {
+				  exp = exp + 1;
+				  mant = 0;
+			  }
+
+			exp = exp + bias;
+			exp = exp << 23;
+
+			finalFloat = sign + exp + mant;
+			return finalFloat;
+
 }
+
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
