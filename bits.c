@@ -487,8 +487,35 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
+	unsigned sign = (x >> 31) << 31;//grab the sign
+	unsigned mant = x;//set the entire input as the mantissa
+	unsigned mantCheck = mant;//save the original mantissa so this one can be manipulated
+	unsigned e = 0;//the mathematical representation in scientific notation of the exp, initialized to 0
+	unsigned frac = 0;//the fractional part of casted float, initialized to 0
+	unsigned exp = 0;//the exponent of casted float, initialized to 0
+	unsigned bias = 127;//bias for single precision in IEEE standard
+	unsigned fracMask = 0x7fffff;
 
-  return 2;
+	if (x == 0){
+		return x;
+	}
+	else {
+
+		if (x < 0){
+			mant = 0 - x;
+		}
+		while (mantCheck != 1){
+			e++;
+			mantCheck = mantCheck >> 1;
+		}
+
+		frac = mant << (23-e);
+		frac = frac & fracMask;
+		exp = (e + bias) << 23;
+
+		return (sign | exp | frac);
+
+	}
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
