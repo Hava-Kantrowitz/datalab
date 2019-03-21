@@ -403,19 +403,20 @@ int ilog2(int x) {
 
 	int add1 = rs16or + 1;
 	int specialMask = add1 >> 1;
+
+	int tMax = ~(1 << 31);//get tmax
+	int specialVal = 4 << 28;//get the value that must be returned when rs16or is tMax
+
+	int logInput = ((((!(rs16or ^ tMax)) << 31) >> 31) & specialVal) | ((((!!(rs16or ^ tMax)) << 31) >> 31) & specialMask);//correct the log input depending on if rs16or is tMax
 	int counter = 0;//counter to keep track of location of gbp
 
-	//return counter;
-
-	int firstHalf = specialMask >> 16;//shift by 16 to grab first half of bit patterm
-	int secondHalf = specialMask;//second half is just the bit pattern
+	int firstHalf = logInput >> 16;//shift by 16 to grab first half of bit patterm
+	int secondHalf = logInput;//second half is just the bit pattern
 
 	int firstHalfZero = !!firstHalf;//0 if first half is all 0's, one otherwise
 	int ultraShift = (firstHalfZero << 31) >> 31;//populate the bit with all 0's if first half is all 0's, all 1's otherwise
 	int whatToKeep = (ultraShift & firstHalf) | (~ultraShift & secondHalf);//return the half with the one in it
-	counter = (ultraShift & (counter + 16)) | (~ultraShift & counter);//update the counter to reflect bit location
-
-	//return counter;
+	counter = ultraShift & (counter + 16) ;//update the counter to reflect bit location
 
 	firstHalf = whatToKeep >> 8;//the above steps are repeated for shift of 8, shifting the bits in half again
 	secondHalf = whatToKeep;
@@ -425,8 +426,6 @@ int ilog2(int x) {
 	counter = (ultraShift & (counter + 8)) | (~ultraShift & counter);
 	whatToKeep = (ultraShift & firstHalf) | (~ultraShift & secondHalf);
 
-	//return counter;
-
 	firstHalf = whatToKeep >> 4;//the above steps are repeated for shift of 4, shifting the bits in half again
 	secondHalf = whatToKeep;
 
@@ -435,8 +434,6 @@ int ilog2(int x) {
 	counter = (ultraShift & (counter + 4)) | (~ultraShift & counter);
 	whatToKeep = (ultraShift & firstHalf) | (~ultraShift & secondHalf);
 
-	//return counter;
-
 	firstHalf = whatToKeep >> 2;//the above steps are repeated for shift of 2, shifting the bits in half again
 	secondHalf = whatToKeep;
 
@@ -444,8 +441,6 @@ int ilog2(int x) {
 	ultraShift = (firstHalfZero << 31) >> 31;
 	counter = (ultraShift & (counter + 2)) | (~ultraShift & counter);
 	whatToKeep = (ultraShift & firstHalf) | (~ultraShift & secondHalf);
-
-	//return counter;
 
 	firstHalf = whatToKeep >> 1;//the above steps are repeated for shift of 1, shifting the bits in half again
 
